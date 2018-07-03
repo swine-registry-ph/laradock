@@ -32,6 +32,16 @@ RUN if [ ${INSTALL_PGSQL} = true ]; then \
         && docker-php-ext-install pdo_pgsql \
 ;fi
 
+# Install Redis
+ARG INSTALL_PHPREDIS=false
+ENV INSTALL_PHPREDIS ${INSTALL_PHPREDIS}
+RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
+    # Install PHP Redis extension
+    pecl install -o -f redis \
+    && rm -rf /tmp/pear \
+    && docker-php-ext-enable redis \
+;fi
+
 RUN rm /var/cache/apk/* \
     && mkdir -p /var/www
 
