@@ -13,7 +13,12 @@ RUN apk --update add wget \
   curl \
   git \
   build-base \
+  imagemagick-dev \
+  libtool \
   libmemcached-dev \
+  freetype-dev \
+  libpng-dev \
+  libjpeg-turbo-dev \
   libmcrypt-dev \
   libxml2-dev \
   zlib-dev \
@@ -24,6 +29,25 @@ RUN apk --update add wget \
 
 RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer xml pcntl
 RUN pecl channel-update pecl.php.net && pecl install memcached mcrypt-1.0.1 && docker-php-ext-enable memcached
+
+# Add Laradock user
+ARG PUID=1000
+ARG PGID=1000
+
+RUN addgroup -g ${PGID} -S laradock && \
+    adduser -u ${PUID} -g laradock -S laradock -G laradock
+
+# GD Library
+RUN docker-php-ext-configure gd \
+      --with-gd \
+      --with-freetype-dir=/usr/include/ \
+      --with-png-dir=/usr/include/ \
+      --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install gd
+
+# ImageMagick
+RUN pecl install imagick \
+    &&  docker-php-ext-enable imagick
 
 # Install PostgreSQL drivers:
 ARG INSTALL_PGSQL=false
